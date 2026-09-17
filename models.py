@@ -10,3 +10,11 @@ class UsuarioDB(Base):
 
 class Usuario(BaseModel):
     nome: str
+
+class UsuarioResponse(BaseModel):
+    id: int
+    nome: str
+
+    model_config = {
+        "from_attributes": True
+    }

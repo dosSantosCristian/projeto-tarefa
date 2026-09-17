@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 
 from database import engine, Base
-from models import UsuarioDB, Usuario
+from models import UsuarioDB, Usuario, UsuarioResponse
 from pydantic import BaseModel
 from services import (
     buscar_usuario, 
@@ -53,9 +53,15 @@ def get_task(task_id: int):
         
     raise HTTPException(status_code=404, detail="Tarefa não encontrada")
 
-@app.get("/usuarios/{id}")
+@app.get("/usuarios/{id}", response_model=UsuarioResponse)
 def buscar_usuario_route(id: int):
 
+    if id <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail="ID inválido"
+            )
+        
     usuario = buscar_usuario(id)
 
     if usuario is None:
@@ -65,14 +71,6 @@ def buscar_usuario_route(id: int):
         )
 
     return usuario
-
-    if id <= 0:
-        raise HTTPException(
-            status_code=400,
-            detail="ID inválido"
-        )
-    
-    return buscar_usuario(id)
 
 @app.get("/usuarios")
 def listar_usuarios_route():
@@ -90,7 +88,7 @@ def create_task(task: TaskCreate):
 
     return new_task
 
-@app.post("/usuarios")
+@app.post("/usuarios", response_model=UsuarioResponse)
 def criar_usuario_route(usuario: Usuario):
     return criar_usuario(usuario.nome)
 
@@ -107,9 +105,8 @@ def deletar_usuario_route(id: int):
 
     return usuario
 
-@app.put("/usuarios/{id}")
+@app.put("/usuarios/{id}", response_model=UsuarioResponse)
 def atualizar_usuario_route(id: int, usuario: Usuario):
-
     usuario_atualizado = atualizar_usuario(
         id,
         usuario.nome
@@ -122,3 +119,7 @@ def atualizar_usuario_route(id: int, usuario: Usuario):
         )
 
     return usuario_atualizado
+
+@app.get("/usuarios", response_model=list[UsuarioResponse])
+def listar_usuarios_route():
+    return listar_usuarios()
