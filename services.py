@@ -1,5 +1,6 @@
 from database import SessionLocal
 from models import UsuarioDB
+from security import gerar_hash_senha
 
 def listar_usuarios():
     db = SessionLocal()
@@ -81,11 +82,17 @@ def atualizar_usuario(id: int, nome: str):
     finally:
         db.close()
 
-def criar_usuario(nome: str):
+def criar_usuario(nome: str, email: str, senha: str):
     db = SessionLocal()
 
     try:
-        novo_usuario = UsuarioDB(nome=nome)
+        senha_hash = gerar_hash_senha(senha)
+
+        novo_usuario = UsuarioDB(
+            nome=nome,
+            email=email,
+            senha_hash=senha_hash
+        )
 
         db.add(novo_usuario)
         db.commit()

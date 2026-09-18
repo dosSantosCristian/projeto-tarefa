@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 
 from database import engine, Base
-from models import UsuarioDB, Usuario, UsuarioResponse
+from models import UsuarioDB, Usuario, UsuarioResponse, UsuarioUpdate
 from pydantic import BaseModel
 from services import (
     buscar_usuario, 
@@ -90,7 +90,11 @@ def create_task(task: TaskCreate):
 
 @app.post("/usuarios", response_model=UsuarioResponse)
 def criar_usuario_route(usuario: Usuario):
-    return criar_usuario(usuario.nome)
+    return criar_usuario(
+        usuario.nome,
+        usuario.email,
+        usuario.senha
+    )
 
 @app.delete("/usuarios/{id}")
 def deletar_usuario_route(id: int):
@@ -106,7 +110,7 @@ def deletar_usuario_route(id: int):
     return usuario
 
 @app.put("/usuarios/{id}", response_model=UsuarioResponse)
-def atualizar_usuario_route(id: int, usuario: Usuario):
+def atualizar_usuario_route(id: int, usuario: UsuarioUpdate):
     usuario_atualizado = atualizar_usuario(
         id,
         usuario.nome
