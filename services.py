@@ -1,6 +1,7 @@
 from database import SessionLocal
 from models import UsuarioDB
 from security import gerar_hash_senha
+from sqlalchemy.exc import IntegrityError
 
 def listar_usuarios():
     db = SessionLocal()
@@ -55,7 +56,7 @@ def deletar_usuario(id: int):
     finally:
         db.close()
 
-def atualizar_usuario(id: int, nome: str):
+def atualizar_usuario(id: int, nome: str, email: str):
     db = SessionLocal()
 
     try:
@@ -69,12 +70,17 @@ def atualizar_usuario(id: int, nome: str):
             return None
 
         usuario.nome = nome
+        usuario.email = email
 
         db.commit()
         db.refresh(usuario)
 
         return usuario
 
+    except IntegrityError:
+        db.rollback()
+        raise ValueError("Email já cadastrado")
+    
     except Exception:
         db.rollback
         raise
@@ -99,6 +105,10 @@ def criar_usuario(nome: str, email: str, senha: str):
         db.refresh(novo_usuario)
 
         return novo_usuario
+
+    except IntegrityError:
+        db.rollback()
+        raise ValueError("Email já cadastrado")
 
     except Exception:
         db.rollback()

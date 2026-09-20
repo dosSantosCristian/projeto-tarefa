@@ -90,11 +90,19 @@ def create_task(task: TaskCreate):
 
 @app.post("/usuarios", response_model=UsuarioResponse)
 def criar_usuario_route(usuario: Usuario):
-    return criar_usuario(
-        usuario.nome,
-        usuario.email,
-        usuario.senha
-    )
+
+    try:
+        return criar_usuario(
+            usuario.nome,
+            usuario.email,
+            usuario.senha
+        )
+
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=409,
+            detail=str(erro)
+        )
 
 @app.delete("/usuarios/{id}")
 def deletar_usuario_route(id: int):
@@ -111,10 +119,19 @@ def deletar_usuario_route(id: int):
 
 @app.put("/usuarios/{id}", response_model=UsuarioResponse)
 def atualizar_usuario_route(id: int, usuario: UsuarioUpdate):
-    usuario_atualizado = atualizar_usuario(
-        id,
-        usuario.nome
-    )
+
+    try:
+        usuario_atualizado = atualizar_usuario(
+            id,
+            usuario.nome,
+            usuario.email
+        )
+
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=409,
+            detail=str(erro)
+        )
 
     if usuario_atualizado is None:
         raise HTTPException(
