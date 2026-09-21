@@ -1,6 +1,6 @@
 from database import SessionLocal
 from models import UsuarioDB
-from security import gerar_hash_senha
+from security import gerar_hash_senha, verificar_senha
 from sqlalchemy.exc import IntegrityError
 
 def listar_usuarios():
@@ -116,3 +116,38 @@ def criar_usuario(nome: str, email: str, senha: str):
 
     finally:
         db.close()
+
+def buscar_usuario_por_email(email: str):
+    db = SessionLocal()
+
+    try:
+        usuario = (
+            db.query(UsuarioDB)
+            .filter(UsuarioDB.email == email)
+            .first()
+        )
+
+        return usuario
+
+    except Exception:
+        db.rollback()
+        raise
+
+    finally:
+        db.close()
+
+def autenticar_usuario(email: str, senha: str):
+    usuario = buscar_usuario_por_email(email)
+
+    if usuario is None:
+        return None
+
+    senha_valida = verificar_senha(
+        senha,
+        usuario.senha_hash
+    )
+
+    if not senha_valida:
+        return None
+
+    return usuario

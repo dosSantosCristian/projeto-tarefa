@@ -1,14 +1,21 @@
 from fastapi import FastAPI, HTTPException
 
 from database import engine, Base
-from models import UsuarioDB, Usuario, UsuarioResponse, UsuarioUpdate
+from models import (
+    UsuarioDB,
+    Usuario,
+    UsuarioResponse,
+    UsuarioUpdate,
+    UsuarioLogin
+)
 from pydantic import BaseModel
 from services import (
     buscar_usuario, 
     listar_usuarios, 
     deletar_usuario,
     atualizar_usuario,
-    criar_usuario
+    criar_usuario,
+    autenticar_usuario
 )
 
 Base.metadata.create_all(bind=engine)
@@ -144,3 +151,19 @@ def atualizar_usuario_route(id: int, usuario: UsuarioUpdate):
 @app.get("/usuarios", response_model=list[UsuarioResponse])
 def listar_usuarios_route():
     return listar_usuarios()
+
+@app.post("/login", response_model=UsuarioResponse)
+def login(usuario: UsuarioLogin):
+
+    usuario_autenticado = autenticar_usuario(
+        usuario.email,
+        usuario.senha
+    )
+
+    if usuario_autenticado is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Email ou senha inválidos"
+        )
+
+    return usuario_autenticado

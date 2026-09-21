@@ -27,3 +27,7 @@ class UsuarioResponse(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+class UsuarioLogin(BaseModel):
+    email: str
+    senha: str
