@@ -9,6 +9,7 @@ class UsuarioDB(Base):
     nome = Column(String)
     email = Column(String, unique=True, index=True)
     senha_hash = Column(String)
+    role = Column(String, default="cliente")
 
 class Usuario(BaseModel):
     nome: str
@@ -23,6 +24,7 @@ class UsuarioResponse(BaseModel):
     id: int
     nome: str
     email: str
+    role: str
 
     model_config = {
         "from_attributes": True

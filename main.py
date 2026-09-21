@@ -1,4 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from datetime import timedelta
+
+from security import criar_token, usuario_autenticado, somente_admin
 
 from database import engine, Base
 from models import (
@@ -79,10 +82,6 @@ def buscar_usuario_route(id: int):
 
     return usuario
 
-@app.get("/usuarios")
-def listar_usuarios_route():
-    return listar_usuarios()
-
 @app.post("/tasks")
 def create_task(task: TaskCreate):
     new_task = {
@@ -112,17 +111,20 @@ def criar_usuario_route(usuario: Usuario):
         )
 
 @app.delete("/usuarios/{id}")
-def deletar_usuario_route(id: int):
+def deletar_usuario_route(
+    id: int,
+    usuario = Depends(usuario_autenticado)
+):
 
-    usuario = deletar_usuario(id)
+    usuario_deletado = deletar_usuario(id)
 
-    if usuario is None:
+    if usuario_deletado is None:
         raise HTTPException(
             status_code=404,
             detail="Usuário não encontrado"
         )
 
-    return usuario
+    return usuario_deletado
 
 @app.put("/usuarios/{id}", response_model=UsuarioResponse)
 def atualizar_usuario_route(id: int, usuario: UsuarioUpdate):
@@ -152,7 +154,7 @@ def atualizar_usuario_route(id: int, usuario: UsuarioUpdate):
 def listar_usuarios_route():
     return listar_usuarios()
 
-@app.post("/login", response_model=UsuarioResponse)
+@app.post("/login")
 def login(usuario: UsuarioLogin):
 
     usuario_autenticado = autenticar_usuario(
@@ -166,4 +168,29 @@ def login(usuario: UsuarioLogin):
             detail="Email ou senha inválidos"
         )
 
-    return usuario_autenticado
+    token = criar_token(
+        {
+            "sub": str(usuario_autenticado.id),
+            "role": usuario_autenticado.role
+        },
+        timedelta(minutes=30)
+    )
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }
+
+@app.get("/perfil")
+def perfil(usuario = Depends(usuario_autenticado)):
+    return {
+        "mensagem": "Você está autenticado!",
+        "usuario": usuario
+    }
+
+@app.get("/admin")
+def area_admin(usuario = Depends(somente_admin)):
+    return {
+        "mensagem": "Bem vindo à área administrativa!",
+        "usuario": usuario
+    }
