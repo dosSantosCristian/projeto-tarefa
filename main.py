@@ -113,7 +113,7 @@ def criar_usuario_route(usuario: Usuario):
 @app.delete("/usuarios/{id}")
 def deletar_usuario_route(
     id: int,
-    usuario = Depends(usuario_autenticado)
+    usuario = Depends(somente_admin)
 ):
 
     usuario_deletado = deletar_usuario(id)

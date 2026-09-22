@@ -56,7 +56,7 @@ def deletar_usuario(id: int):
     finally:
         db.close()
 
-def atualizar_usuario(id: int, nome: str, email: str):
+def atualizar_usuario(id: int, nome: str | None, email: str | None):
     db = SessionLocal()
 
     try:
@@ -69,8 +69,11 @@ def atualizar_usuario(id: int, nome: str, email: str):
         if usuario is None:
             return None
 
-        usuario.nome = nome
-        usuario.email = email
+        if nome is not None:
+            usuario.nome = nome
+            
+        if email is not None:
+            usuario.email = email
 
         db.commit()
         db.refresh(usuario)
