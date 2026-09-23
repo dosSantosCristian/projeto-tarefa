@@ -85,7 +85,7 @@ def atualizar_usuario(id: int, nome: str | None, email: str | None):
         raise ValueError("Email já cadastrado")
     
     except Exception:
-        db.rollback
+        db.rollback()
         raise
 
     finally:

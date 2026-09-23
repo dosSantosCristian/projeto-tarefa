@@ -32,6 +32,14 @@ class UsuarioUpdate(BaseModel):
     nome: Optional[str] = Field(default=None, min_length=3)
     email: Optional[EmailStr] = None
 
+    @field_validator("nome")
+    @classmethod
+    def validar_nome(cls, valor):
+        if not valor.strip():
+            raise ValueError("O nome não pode conter apenas espaços")
+
+        return valor
+
     @model_validator(mode="after")
     def validar_atualizacao(self):
         if self.nome is None and self.email is None:
