@@ -3,18 +3,16 @@ from models import UsuarioDB
 from security import gerar_hash_senha, verificar_senha
 from sqlalchemy.exc import IntegrityError
 
-def listar_usuarios():
-    db = SessionLocal()
+def listar_usuarios(db):
+    try:
+        usuarios = db.query(UsuarioDB).all()
+        return usuarios
 
-    usuarios = db.query(UsuarioDB).all()
-
-    db.close()
+    except Exception:
+        db.rollback()
+        raise  
     
-    return usuarios
-
-def buscar_usuario(id: int):
-    db = SessionLocal()
-
+def buscar_usuario(id: int, db):
     try:
         usuario = (
             db.query(UsuarioDB)
@@ -27,9 +25,6 @@ def buscar_usuario(id: int):
     except Exception:
         db.rollback()
         raise
-
-    finally:
-        db.close() 
 
 def deletar_usuario(id: int):
     db = SessionLocal()

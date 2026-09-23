@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from security import criar_token, usuario_autenticado, somente_admin
 
-from database import engine, Base
+from database import engine, Base, get_db
 from models import (
     UsuarioDB,
     Usuario,
@@ -64,7 +64,7 @@ def get_task(task_id: int):
     raise HTTPException(status_code=404, detail="Tarefa não encontrada")
 
 @app.get("/usuarios/{id}", response_model=UsuarioResponse)
-def buscar_usuario_route(id: int):
+def buscar_usuario_route(id: int, db = Depends(get_db)):
 
     if id <= 0:
             raise HTTPException(
@@ -72,7 +72,7 @@ def buscar_usuario_route(id: int):
                 detail="ID inválido"
             )
         
-    usuario = buscar_usuario(id)
+    usuario = buscar_usuario(id, db)
 
     if usuario is None:
         raise HTTPException(
@@ -151,8 +151,8 @@ def atualizar_usuario_route(id: int, usuario: UsuarioUpdate):
     return usuario_atualizado
 
 @app.get("/usuarios", response_model=list[UsuarioResponse])
-def listar_usuarios_route():
-    return listar_usuarios()
+def listar_usuarios_route(db = Depends(get_db)):
+    return listar_usuarios(db)
 
 @app.post("/login")
 def login(usuario: UsuarioLogin):
