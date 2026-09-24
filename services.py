@@ -26,8 +26,7 @@ def buscar_usuario(id: int, db):
         db.rollback()
         raise
 
-def deletar_usuario(id: int):
-    db = SessionLocal()
+def deletar_usuario(id: int, db):
 
     try:
         usuario = (
@@ -48,11 +47,7 @@ def deletar_usuario(id: int):
         db.rollback()
         raise
 
-    finally:
-        db.close()
-
-def atualizar_usuario(id: int, nome: str | None, email: str | None):
-    db = SessionLocal()
+def atualizar_usuario(id: int, nome: str | None, email: str | None, db):
 
     try:
         usuario = (
@@ -83,11 +78,7 @@ def atualizar_usuario(id: int, nome: str | None, email: str | None):
         db.rollback()
         raise
 
-    finally:
-        db.close()
-
-def criar_usuario(nome: str, email: str, senha: str):
-    db = SessionLocal()
+def criar_usuario(nome: str, email: str, senha: str, db):
 
     try:
         senha_hash = gerar_hash_senha(senha)
@@ -112,12 +103,8 @@ def criar_usuario(nome: str, email: str, senha: str):
         db.rollback()
         raise
 
-    finally:
-        db.close()
-
-def buscar_usuario_por_email(email: str):
-    db = SessionLocal()
-
+def buscar_usuario_por_email(email: str, db):
+    
     try:
         usuario = (
             db.query(UsuarioDB)
@@ -131,11 +118,8 @@ def buscar_usuario_por_email(email: str):
         db.rollback()
         raise
 
-    finally:
-        db.close()
-
-def autenticar_usuario(email: str, senha: str):
-    usuario = buscar_usuario_por_email(email)
+def autenticar_usuario(email: str, senha: str, db):
+    usuario = buscar_usuario_por_email(email, db)
 
     if usuario is None:
         return None

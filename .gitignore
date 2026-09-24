@@ -2,3 +2,4 @@
 __pycache__/
 *.pyc
 usuarios.db
+teste.db

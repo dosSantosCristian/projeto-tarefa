@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
 from main import app
-from database import Base
+from database import Base, get_db
 
 TEST_DATABASE_URL = "sqlite:///./teste.db"
 
@@ -23,7 +23,18 @@ TestingSessionLocal = sessionmaker(
 def client():
     Base.metadata.create_all(bind=engine)
 
+    def override_get_db():
+        db = TestingSessionLocal()
+
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+
     with TestClient(app) as cliente:
         yield cliente
 
+    app.dependency_overrides.clear()
     Base.metadata.drop_all(bind=engine)

@@ -95,13 +95,14 @@ def create_task(task: TaskCreate):
     return new_task
 
 @app.post("/usuarios", response_model=UsuarioResponse)
-def criar_usuario_route(usuario: Usuario):
+def criar_usuario_route(usuario: Usuario, db = Depends(get_db)):
 
     try:
         return criar_usuario(
             usuario.nome,
             usuario.email,
-            usuario.senha
+            usuario.senha,
+            db
         )
 
     except ValueError as erro:
@@ -113,10 +114,11 @@ def criar_usuario_route(usuario: Usuario):
 @app.delete("/usuarios/{id}")
 def deletar_usuario_route(
     id: int,
+    db = Depends(get_db),
     usuario = Depends(somente_admin)
 ):
 
-    usuario_deletado = deletar_usuario(id)
+    usuario_deletado = deletar_usuario(id, db)
 
     if usuario_deletado is None:
         raise HTTPException(
@@ -127,13 +129,18 @@ def deletar_usuario_route(
     return usuario_deletado
 
 @app.put("/usuarios/{id}", response_model=UsuarioResponse)
-def atualizar_usuario_route(id: int, usuario: UsuarioUpdate):
+def atualizar_usuario_route(
+    id: int, 
+    usuario: UsuarioUpdate,
+    db = Depends(get_db)
+):
 
     try:
         usuario_atualizado = atualizar_usuario(
             id,
             usuario.nome,
-            usuario.email
+            usuario.email,
+            db
         )
 
     except ValueError as erro:
@@ -155,11 +162,15 @@ def listar_usuarios_route(db = Depends(get_db)):
     return listar_usuarios(db)
 
 @app.post("/login")
-def login(usuario: UsuarioLogin):
+def login(
+    usuario: UsuarioLogin,
+    db = Depends(get_db)
+):
 
     usuario_autenticado = autenticar_usuario(
         usuario.email,
-        usuario.senha
+        usuario.senha, 
+        db
     )
 
     if usuario_autenticado is None:
