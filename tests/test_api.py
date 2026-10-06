@@ -334,3 +334,14 @@ def test_deletar_usuario_admin(client):
 
     assert resposta.status_code == 200
     assert resposta.json()["id"] == id_usuario
+
+def test_atualizar_usuario_inexistente(client):
+    resposta = client.put(
+        "/usuarios/9999",
+        json={
+            "nome": "Nome Novo"
+        }
+    )
+
+    assert resposta.status_code == 404
+    assert resposta.json()["detail"] == "Usuário não encontrado"
